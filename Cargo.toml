@@ -1,0 +1,30 @@
+[package]
+name = "reddit_api"
+version = "0.1.0"
+authors = ["Hyde46 <denis.heid@protonmail.com>"]
+keywords=["reddit","api"]
+edition = "2018"
+
+[lib]
+name = "reddit_api"
+path = "src/lib.rs"
+
+[[bin]]
+name = "reddit_api_bin"
+path = "src/bin.rs"
+
+[dependencies]
+log = "0.4.8"
+env_logger = "0.6.0"
+curl = "0.4.29"
+webbrowser = "0.5.2"
+tiny_http = "0.7"
+rand = "0.7.3" 
+serde = { version = "1.0.110", features = ["derive"] }
+serde_json = "1.0"
+failure = "0.1"
+
+
+
+[dev-dependencies]
+tokio = { version = "0.2", features = ["full"] }
