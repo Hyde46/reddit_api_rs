@@ -70,6 +70,12 @@ impl Reddit {
         self
     }
 
+
+    /// Prepares GET request 
+    /// # Arguments
+    ///
+    /// * `url` - Consists of base url to api endpoint
+    /// * `param` - HashMap of parameter name and values
     pub fn get(
         &self,
         url: &str,
