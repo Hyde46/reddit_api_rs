@@ -7,4 +7,5 @@ extern crate log;
 extern crate failure;
 
 pub mod client;
+pub mod oauth2;
 pub mod util;

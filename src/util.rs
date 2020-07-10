@@ -1,3 +1,5 @@
+use rand::distributions::Alphanumeric;
+use rand::{self, Rng};
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::hash::Hash;
@@ -27,4 +29,12 @@ pub fn convert_map_to_string<
         string.push_str("&");
     }
     string
+}
+
+/// Generates a random string of `length` from Alphanumeric values
+pub fn generate_random_string(length: usize) -> String {
+    rand::thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(length)
+        .collect()
 }

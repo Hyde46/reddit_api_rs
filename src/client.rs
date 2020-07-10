@@ -8,6 +8,21 @@ use serde_json::Value;
 
 use super::util::convert_map_to_string;
 
+use super::oauth2::RedditClientCredentials;
+use super::oauth2::RedditOAuthClient;
+
+#[derive(PartialEq, Debug)]
+/// Determines during client authorization whether the token is permanent or temporary
+pub enum AuthorizationTimeOption {
+    permanent,
+    temporary,
+}
+impl fmt::Display for AuthorizationTimeOption {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 /// Reddit API client.
 /// Allows to communicate with reddit REST and oauth2 endpoints
@@ -17,6 +32,8 @@ use super::util::convert_map_to_string;
 pub struct Reddit {
     pub oauth_prefix: String,
     pub basic_prefix: String,
+    pub client_credentials: RedditClientCredentials,
+    //pub oauth_client: RedditOAuthClient,
     is_built: bool,
 }
 
@@ -33,8 +50,23 @@ impl Reddit {
         Reddit {
             oauth_prefix: "https://www.reddit.com/api/v1/".to_owned(),
             basic_prefix: "https://www.reddit.com/".to_owned(),
+            client_credentials: RedditClientCredentials::default(),
             is_built: false,
         }
+    }
+    /// Sets Client credentials if custom ones are wished
+    ///
+    /// # Example
+    /// ```
+    /// use reddit_api::client::Reddit;
+    /// use reddit_api::oauth2::RedditClientCredentials;
+    /// let credentials = RedditClientCredentials::default().client_id("ABC");
+    /// let reddit = Reddit::default()
+    ///                      .client_credentials(&credentials);
+    /// ```
+    pub fn client_credentials(mut self, client_credentials: &RedditClientCredentials) -> Reddit {
+        self.client_credentials = client_credentials.clone();
+        self
     }
     /// Sets reddit api oauth endpoint url
     ///
@@ -70,8 +102,7 @@ impl Reddit {
         self
     }
 
-
-    /// Prepares GET request 
+    /// Prepares GET request
     /// # Arguments
     ///
     /// * `url` - Consists of base url to api endpoint
@@ -127,6 +158,32 @@ impl Reddit {
             transfer.perform().unwrap();
         };
         Ok(return_data.join(""))
+    }
+
+    /// Authorizes Reddit client by opening the default webbrowser, asking the user to grant access for this application to act in the name of the authorized user account /// # Arguments
+    ///
+    /// * `duration` - Option of Either AuthorizationTimeOption::Permanent or AuthorizationTimeOption::Temporary. If not set, defaults to AuthorizationTimeOption::Permanent
+    pub fn authorize_reddit_user(
+        &self,
+        duration: Option<AuthorizationTimeOption>,
+    ) -> Result<String, String> {
+        let authorize_endpoint = "authorize";
+        // Get `duration` string if option is set
+        let mut duration_string = AuthorizationTimeOption::permanent.to_string();
+        if let Some(duration) = duration {
+            duration_string = duration.to_string();
+        }
+        // build authorization HashMap
+        let mut params: HashMap<String, String> = HashMap::new();
+        params.insert(
+            "client_id".to_owned(),
+            self.client_credentials.client_id.to_owned(),
+        );
+        params.insert("response_type".to_owned(), "code".to_owned());
+        params.insert("duration".to_owned(), duration_string);
+        //params.insert("scope".to_owned(), )
+        // let authorization_link = format!( "client_id={}&response_type=code&state={}&redirect_uri=http%3A%2F%2F127.0.0.1:8000&duration=permanent&scope=identity",client_id,client_state);
+        return Ok("All good".to_string());
     }
 }
 
