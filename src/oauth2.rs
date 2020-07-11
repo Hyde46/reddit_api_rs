@@ -55,7 +55,7 @@ pub struct RedditOAuthClient {
     /// If OAuthClient is in error state, then displays last error
     pub error_state: Option<String>,
     /// Randomly generated string to validate reddit oauth responses
-    state_string: String,
+    pub state_string: String,
 }
 impl RedditOAuthClient {
     pub fn default() -> RedditOAuthClient {
@@ -68,6 +68,16 @@ impl RedditOAuthClient {
             error_state: None,
             state_string: generate_random_string(10),
         }
+    }
+    /// Set `state_string`
+    pub fn state_string(mut self, state_string: &str) -> RedditOAuthClient {
+        self.state_string = state_string.to_owned();
+        self
+    }
+    /// Set `oauth_bearer_token`
+    pub fn oauth_bearer_token(mut self, oauth_bearer_token: &OAuthToken) -> RedditOAuthClient {
+        self.oauth_bearer_token = Some(oauth_bearer_token.clone());
+        self
     }
 }
 
