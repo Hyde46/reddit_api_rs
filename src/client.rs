@@ -1,16 +1,21 @@
+// Built in libraries
 use std::collections::HashMap;
+use std::env;
 use std::fmt;
 use std::string::String;
 
+// Third party libraries
 use curl::easy::{Easy, List};
+use log::{info, warn};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use super::util::convert_map_to_string;
-
+// Own includes
+use super::oauth2::OAuthState;
 use super::oauth2::RedditApiScope;
 use super::oauth2::RedditClientCredentials;
 use super::oauth2::RedditOAuthClient;
+use super::util::convert_map_to_string;
 
 #[derive(PartialEq, Debug)]
 /// Determines during client authorization whether the token is permanent or temporary
@@ -31,10 +36,9 @@ impl fmt::Display for AuthorizationTimeOption {
 /// Endpoints are partially implemented.
 /// See github repository for current implementations and roadmap
 pub struct Reddit {
-    pub oauth_prefix: String,
+    pub authorized_prefix: String,
     pub basic_prefix: String,
     pub client_credentials: RedditClientCredentials,
-    pub oauth_client: RedditOAuthClient,
     is_built: bool,
 }
 
@@ -49,26 +53,11 @@ impl Reddit {
     /// Note: object is in usable state after `build()` is called.
     pub fn default() -> Reddit {
         Reddit {
-            oauth_prefix: "https://www.reddit.com/api/v1/".to_owned(),
+            authorized_prefix: "https://www.reddit.com/api/v1/".to_owned(),
             basic_prefix: "https://www.reddit.com/".to_owned(),
             client_credentials: RedditClientCredentials::default(),
-            oauth_client: RedditOAuthClient::default(),
             is_built: false,
         }
-    }
-    /// Sets Reddit OAuth Client if custom ones are wished
-    ///
-    /// # Example
-    /// ```
-    /// use reddit_api::client::Reddit;
-    /// use reddit_api::oauth2::RedditOAuthClient;
-    /// let oauth_client = RedditOAuthClient::default().state_string("123abc");
-    /// let reddit = Reddit::default()
-    ///                      .oauth_client(&oauth_client);
-    /// ```
-    pub fn oauth_client(mut self, oauth_client: &RedditOAuthClient) -> Reddit {
-        self.oauth_client = oauth_client.clone();
-        self
     }
     /// Sets Client credentials if custom ones are wished
     ///
@@ -90,10 +79,10 @@ impl Reddit {
     /// ```
     /// use reddit_api::client::Reddit;
     /// let reddit = Reddit::default()
-    ///                      .oauth_prefix("https://www.alternate_reddit.com/api/v1/");
+    ///                      .authorized_prefix("https://www.alternate_reddit.com/api/v1/");
     /// ```
-    pub fn oauth_prefix(mut self, prefix: &str) -> Reddit {
-        self.oauth_prefix = prefix.to_owned();
+    pub fn authorized_prefix(mut self, prefix: &str) -> Reddit {
+        self.authorized_prefix = prefix.to_owned();
         self
     }
     /// Sets reddit api url for non-authorized endpoints
@@ -111,7 +100,7 @@ impl Reddit {
     /// Validates Reddit object in a basic manner.
     /// After calling, object is ready to use
     pub fn build(mut self) -> Reddit {
-        if self.oauth_prefix == "" || self.basic_prefix == "" {
+        if self.authorized_prefix == "" || self.basic_prefix == "" {
             panic!("No prefixes provided. Cannot communicate with reddit API endpoint!");
         }
         self.is_built = true;
@@ -175,38 +164,6 @@ impl Reddit {
         Ok(return_data.join(""))
     }
 
-    /// Authorizes Reddit client by opening the default webbrowser, asking the user to grant access for this application to act in the name of the authorized user account /// # Arguments
-    ///
-    /// * `duration` - Option of Either AuthorizationTimeOption::Permanent or AuthorizationTimeOption::Temporary. If not set, defaults to AuthorizationTimeOption::Permanent
-    pub fn authorize_reddit_user(
-        &self,
-        duration: Option<AuthorizationTimeOption>,
-    ) -> Result<String, String> {
-        if !self.is_built {
-            return Err("Object not built. Run `build()` before calling this method.".to_string());
-        }
-        let authorize_endpoint = "authorize";
-        // Get `duration` string if option is set
-        let mut duration_string = AuthorizationTimeOption::permanent.to_string();
-        if let Some(duration) = duration {
-            duration_string = duration.to_string();
-        }
-        // build authorization HashMap
-        let mut params: HashMap<String, String> = HashMap::new();
-        params.insert("response_type".to_owned(), "code".to_owned());
-        params.insert("duration".to_owned(), duration_string);
-        params.insert("scope".to_owned(), RedditApiScope::identity.to_string());
-        params.insert("state".to_owned(), self.oauth_client.state_string.clone());
-        params.insert(
-            "client_id".to_owned(),
-            self.client_credentials.client_id.to_owned(),
-        );
-        params.insert(
-            "redirect_uri".to_owned(),
-            self.oauth_client.callback_url.clone(),
-        );
-        return Ok("All good".to_string());
-    }
 }
 
 #[cfg(test)]
@@ -218,7 +175,7 @@ mod tests {
         let reddit = Reddit::default();
         assert_eq!(reddit.basic_prefix, "https://www.reddit.com/".to_owned());
         assert_eq!(
-            reddit.oauth_prefix,
+            reddit.authorized_prefix,
             "https://www.reddit.com/api/v1/".to_owned()
         );
     }
@@ -232,7 +189,7 @@ mod tests {
     #[test]
     #[should_panic(expected = "No prefixes provided. Cannot communicate with reddit API endpoint!")]
     fn test_use_reddit_without_oauth_prefix() {
-        Reddit::default().oauth_prefix("").build();
+        Reddit::default().authorized_prefix("").build();
     }
     #[test]
     #[should_panic(expected = "No prefixes provided. Cannot communicate with reddit API endpoint!")]
