@@ -14,20 +14,7 @@ use serde_json::Value;
 use super::oauth2::OAuthState;
 use super::oauth2::RedditApiScope;
 use super::oauth2::RedditClientCredentials;
-use super::oauth2::RedditOAuthClient;
-use super::util::convert_map_to_string;
-
-#[derive(PartialEq, Debug)]
-/// Determines during client authorization whether the token is permanent or temporary
-pub enum AuthorizationTimeOption {
-    permanent,
-    temporary,
-}
-impl fmt::Display for AuthorizationTimeOption {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
+use super::oauth2::RedditOAuth;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 /// Reddit API client.
@@ -163,7 +150,6 @@ impl Reddit {
         };
         Ok(return_data.join(""))
     }
-
 }
 
 #[cfg(test)]

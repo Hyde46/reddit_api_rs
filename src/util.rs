@@ -38,3 +38,10 @@ pub fn generate_random_string(length: usize) -> String {
         .take(length)
         .collect()
 }
+
+pub fn open_browser(url: &str) -> Result<(), String> {
+    if !webbrowser::open(url).is_ok() {
+        return Err("Could not open browser. Is a default browser set?".to_owned());
+    }
+    return Ok(());
+}

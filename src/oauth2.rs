@@ -1,9 +1,30 @@
+//Built in libraries
+use std::collections::HashMap;
+use std::env;
+use std::fmt;
+
+//Third party libraries
 use dotenv::dotenv;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::env;
 
+//Own stuff
+use super::callback_server::get_browser_response;
+use super::util::convert_map_to_string;
 use super::util::generate_random_string;
+use super::util::open_browser;
+
+#[derive(PartialEq, Debug)]
+/// Determines during client authorization whether the token is permanent or temporary
+pub enum AuthorizationTime {
+    permanent,
+    temporary,
+}
+impl fmt::Display for AuthorizationTime {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
 
 #[derive(PartialEq, Clone, Serialize, Deserialize, Debug)]
 pub enum OAuthState {
@@ -48,50 +69,114 @@ impl std::fmt::Display for RedditApiScope {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RedditOAuthClient {
-    pub oauth_bearer_token: Option<OAuthToken>,
+pub struct RedditOAuth {
     pub callback_url: String,
     pub oauth_state: OAuthState,
     /// If OAuthClient is in error state, then displays last error
-    pub error_state: Option<String>,
+    pub error_string: Option<String>,
     /// Randomly generated string to validate reddit oauth responses
     pub state_string: String,
+    /// Credentials for reddit_api application
+    pub client_credentials: RedditClientCredentials,
 }
-impl RedditOAuthClient {
-    pub fn default() -> RedditOAuthClient {
+impl RedditOAuth {
+    pub fn default() -> RedditOAuth {
         dotenv().ok();
         let callback_url = env::var("REDIRECT_URI").unwrap_or_default();
-        RedditOAuthClient {
-            oauth_bearer_token: None,
+        RedditOAuth {
             callback_url: callback_url,
             oauth_state: OAuthState::IDLE,
-            error_state: None,
+            error_string: None,
             state_string: generate_random_string(10),
+            client_credentials: RedditClientCredentials::default(),
         }
     }
     /// Set `state_string`
-    pub fn state_string(mut self, state_string: &str) -> RedditOAuthClient {
+    pub fn state_string(mut self, state_string: &str) -> RedditOAuth {
         self.state_string = state_string.to_owned();
         self
     }
-    /// Set `oauth_bearer_token`
-    pub fn oauth_bearer_token(mut self, oauth_bearer_token: &OAuthToken) -> RedditOAuthClient {
-        self.oauth_bearer_token = Some(oauth_bearer_token.clone());
-        self
-    }
     /// Set `oauth_state`
-    pub fn oauth_state(mut self, oauth_state: &OAuthState) -> RedditOAuthClient {
+    pub fn oauth_state(mut self, oauth_state: OAuthState) -> RedditOAuth {
         self.oauth_state = oauth_state.clone();
         self
     }
-    /// Set `error_state'
-    pub fn error_state(mut self, error_state: &str) -> RedditOAuthClient {
-        self.error_state = Some(error_state.to_owned());
+    /// Set `error_string'
+    pub fn error_state(mut self, error_state: &str) -> RedditOAuth {
+        self.error_string = Some(error_state.to_owned());
+        self
+    }
+    /// Validate RedditOAuth object
+    /// After calling, object is ready to use
+    pub fn build(mut self) -> RedditOAuth {
+        let error_flag = self.callback_url == "" || self.state_string == "";
+        if error_flag {
+            self.oauth_state = OAuthState::ERROR;
+            self.error_string = Some("`callback_url` and `state_string` have to be set".to_owned());
+            return self;
+        }
+        self.oauth_state = OAuthState::IDLE;
         self
     }
 
     /// Authorize user by opening default browser and present reddit authorization dialog
-    pub fn authorize_client_browser_based(mut self, url: &str) {}
+    /// to receive Bearer Token
+    ///
+    /// # Arguments
+    ///
+    /// * `scope` - String of concatenated scopes the bearer token should have authorization of
+    /// * `duration` - AuthorizationTime::permanent or AuthorizationTime::temporary
+    ///
+    /// # Returns
+    /// `Option<OAuthToken>` If authorization was successfull, OAuthToken is set, otherwise `RedditOAuth.oauth_state=OAuthState::error` with an error message in `RedditOAuth.error_string`
+    pub fn authorize_client(
+        mut self,
+        scope: &str,
+        duration: Option<AuthorizationTime>,
+    ) -> Option<OAuthToken> {
+        // Get `duration` string if option is set
+        let mut duration_string = AuthorizationTime::permanent.to_string();
+        if let Some(duration) = duration {
+            duration_string = duration.to_string();
+        }
+        // build authorization HashMap
+        let mut params: HashMap<String, String> = HashMap::new();
+        params.insert("response_type".to_owned(), "code".to_owned());
+        params.insert("duration".to_owned(), duration_string);
+        params.insert("scope".to_owned(), scope.to_owned());
+        params.insert("state".to_owned(), self.state_string.clone());
+        params.insert(
+            "client_id".to_owned(),
+            self.client_credentials.client_id.to_owned(),
+        );
+        params.insert("redirect_uri".to_owned(), self.callback_url.clone());
+        let query_string = convert_map_to_string(&params);
+        let authorize_url = format!("https://www.reddit.com/api/v1/authorize?{}", query_string);
+        match open_browser(&authorize_url) {
+            Err(e) => {
+                self.oauth_state = OAuthState::ERROR;
+                self.error_string = Some(e);
+                return None;
+            }
+            _ => {}
+        }
+        match get_browser_response(
+            120,
+            &self.state_string,
+            &self.callback_url,
+            &self.client_credentials,
+        ) {
+            Ok(token) => {
+                self.oauth_state = OAuthState::AUTHORIZED;
+                return Some(token);
+            }
+            Err(e) => {
+                self.error_string = Some(e);
+                self.oauth_state = OAuthState::ERROR;
+                return None;
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -136,46 +221,6 @@ impl RedditClientCredentials {
         self.client_secret = client_secret.to_owned();
         self
     }
-    /*
-    /// Authorizes Reddit client by opening the default webbrowser, asking the user to grant access for this application to act in the name of the authorized user account /// # Arguments
-    ///
-    /// * `duration` - Option of Either AuthorizationTimeOption::Permanent or AuthorizationTimeOption::Temporary. If not set, defaults to AuthorizationTimeOption::Permanent
-    pub fn authorize_reddit_user(
-        &self,
-        duration: Option<AuthorizationTimeOption>,
-    ) -> Result<String, String> {
-        if !self.is_built {
-            return Err("Object not built. Run `build()` before calling this method.".to_string());
-        }
-        let authorize_endpoint = "authorize";
-        // Get `duration` string if option is set
-        let mut duration_string = AuthorizationTimeOption::permanent.to_string();
-        if let Some(duration) = duration {
-            duration_string = duration.to_string();
-        }
-        // build authorization HashMap
-        let mut params: HashMap<String, String> = HashMap::new();
-        params.insert("response_type".to_owned(), "code".to_owned());
-        params.insert("duration".to_owned(), duration_string);
-        params.insert("scope".to_owned(), RedditApiScope::identity.to_string());
-        params.insert("state".to_owned(), self.oauth_client.state_string.clone());
-        params.insert(
-            "client_id".to_owned(),
-            self.client_credentials.client_id.to_owned(),
-        );
-        params.insert(
-            "redirect_uri".to_owned(),
-            self.oauth_client.callback_url.clone(),
-        );
-        let query_string = convert_map_to_string(&params);
-        let authorize_url = format!(
-            "{}{}?{}",
-            self.authorized_prefix, authorize_endpoint, query_string
-        );
-        self.oauth_client
-            .authorize_client_browser_based(&authorize_url);
-        return Ok("All good".to_string());
-    }*/
 }
 
 #[cfg(test)]

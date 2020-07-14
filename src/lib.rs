@@ -6,6 +6,7 @@ extern crate log;
 #[macro_use]
 extern crate failure;
 
+mod callback_server;
 pub mod client;
 pub mod oauth2;
 pub mod util;
