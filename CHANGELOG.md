@@ -1,4 +1,9 @@
 
+## 0.1.1 (2020/15/07)
+
+- Add functionality to refresh bearer token
+- Extract `post` function from `callback_server.rs` to simplify that authentication step
+
 ## 0.1.0 (2020/10/07)
 
 - reddit_api first release
