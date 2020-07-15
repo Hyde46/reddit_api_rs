@@ -45,6 +45,7 @@ impl std::fmt::Display for OAuthState {
 #[allow(non_camel_case_types)]
 #[derive(PartialEq, Debug)]
 /// Reddit API Scope strings. Defines the scope, a bearer token is limited to
+/// See https://www.reddit.com/api/v1/scopes for a list of scopes and their usages
 pub enum RedditApiScope {
     identity,
     edit,
@@ -261,7 +262,6 @@ impl RedditOAuth {
     }
 }
 
-/// Reddit Client credentials object
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RedditClientCredentials {
     pub client_id: String,

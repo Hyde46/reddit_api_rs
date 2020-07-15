@@ -1,5 +1,6 @@
 extern crate reddit_api;
 
+use reddit_api::client::Reddit;
 use reddit_api::oauth2::{AuthorizationTime, RedditApiScope, RedditOAuth};
 use reddit_api::util::convert_scope_vec_to_string;
 
@@ -8,15 +9,17 @@ fn main() {
     // Defines which endpoints the bearer token is allowed to access
     let mut scopes = Vec::new();
     scopes.push(RedditApiScope::identity);
-    scopes.push(RedditApiScope::subscribe);
+    scopes.push(RedditApiScope::read);
     let scope_string = convert_scope_vec_to_string(&scopes);
     // Authenticate user. Returns bearer token
     let bearer_token =
         reddit_oauth.authorize_client(&scope_string, Some(AuthorizationTime::permanent));
-
     if let Some(token) = bearer_token {
-        // Revoke rights of token
-        reddit_oauth.revoke_token(&token);
-        println!("Token revoked!");
+        let reddit = Reddit::default().bearer_token(token).build();
+        let answer = reddit.get_top_posts();
+        match answer {
+            Ok(_) => {}
+            Err(e) => println!("{}", e),
+        }
     }
 }

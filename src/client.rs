@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 // Own includes
+use super::model::token::OAuthToken;
 use super::oauth2::OAuthState;
 use super::oauth2::RedditApiScope;
 use super::oauth2::RedditClientCredentials;
@@ -27,6 +28,7 @@ pub struct Reddit {
     pub authorized_prefix: String,
     pub basic_prefix: String,
     pub client_credentials: RedditClientCredentials,
+    pub bearer_token: Option<OAuthToken>,
     is_built: bool,
 }
 
@@ -44,6 +46,7 @@ impl Reddit {
             authorized_prefix: "https://www.reddit.com/api/v1/".to_owned(),
             basic_prefix: "https://www.reddit.com/".to_owned(),
             client_credentials: RedditClientCredentials::default(),
+            bearer_token: None,
             is_built: false,
         }
     }
@@ -85,6 +88,11 @@ impl Reddit {
         self.basic_prefix = prefix.to_owned();
         self
     }
+    /// Set bearer token
+    pub fn bearer_token(mut self, token: OAuthToken) -> Reddit {
+        self.bearer_token = Some(token.clone());
+        self
+    }
     /// Validates Reddit object in a basic manner.
     /// After calling, object is ready to use
     pub fn build(mut self) -> Reddit {
@@ -95,62 +103,35 @@ impl Reddit {
         self
     }
 
-    /// Prepares GET request
+    // 
+    // `read` SCOPE
+    // 
+
+    /// Get `/top` posts for the authenticated user
+    /// `bearer_token` needs to be set for `Reddit` struct.
+    /// `read` scope is required
     /// # Arguments
-    ///
-    /// * `url` - Consists of base url to api endpoint
-    /// * `param` - HashMap of parameter name and values
-    pub fn get(&self, url: &str, params: &mut HashMap<String, String>) -> Result<String, String> {
-        if !self.is_built {
-            return Err("Object not built. Run `build()` before calling this method.".to_string());
-        }
-        if !params.is_empty() {
-            /* let param: String = convert_map_to_string(params);
-            let mut url_with_params = url.to_owned();
-            url_with_params.push('?');
-            url_with_params.push_str(&param);*/
-            // curl here
-            return Err("Not implemented".to_string());
+    /// 
+    /// * `t` - Filter, one of (hour, day, week, month, year, all)
+    /// * `after` - fullname of a thing. Only one of `after` and `before` should be specified
+    /// * `before` - fullname of a thing. Only one of `after` and `before` should be specified
+    /// * `count` - a positive integer. The number of items already seen in this listing. On the html site, the builder uses this to determine when to give values for `before` and `after` in the response ( default: 0 )
+    /// * `limit` - The maximum number of items desired ( default: 25, maximum: 100)
+    /// * `show` - (optional) optional parameter; if set,  filters such as "hide links that I have voted on" will be disabled.
+    /// * `sr_detail` - (optional) expand subreddits
+    pub fn get_top_posts(&self) -> Result<(), String> {
+        if let Some(token) = &self.bearer_token {
+            // Check if correct scope is set for token
+            if !token.scope.contains("read") {
+                return Err("Insufficient scope rights. Need scope: `read`.".to_owned());
+            } else {
+                return Ok(());
+            }
         } else {
-            //curl here without parameters
-            return Err("Not implemented".to_string());
+            return Err("Bearer Token not set. Authentication necessary for ".to_owned());
         }
     }
 
-    pub fn post(&self, url: &str, payload: &str) {}
-    pub fn put(&self, url: &str, payload: &str) {}
-    pub fn delete(&self, url: &str, payload: &str) {}
-
-    fn curl_reddit(&self, complete_url: &str, payload: Option<&str>) -> Result<String, String> {
-        if !self.is_built {
-            return Err("Object not built. Run `build()` before calling this method.".to_string());
-        }
-        let user_agent_header = format!("User-Agent: reddit_api/{}", VERSION);
-        let mut easy = Easy::new();
-        easy.url(&complete_url).unwrap();
-        easy.useragent(&user_agent_header).unwrap();
-
-        if let Some(p) = payload {
-            let mut list = List::new();
-            list.append(p).unwrap();
-            easy.http_headers(list).unwrap()
-        }
-
-        let mut return_data: Vec<String> = Vec::new();
-        let mut html: String = String::new();
-        {
-            let mut transfer = easy.transfer();
-            transfer
-                .write_function(|data| {
-                    html = String::from_utf8(Vec::from(data)).unwrap();
-                    return_data.push(html.clone());
-                    Ok(data.len())
-                })
-                .unwrap();
-            transfer.perform().unwrap();
-        };
-        Ok(return_data.join(""))
-    }
 }
 
 #[cfg(test)]
