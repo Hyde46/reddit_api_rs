@@ -8,5 +8,7 @@ extern crate failure;
 
 mod callback_server;
 pub mod client;
+mod curl_utils;
+pub mod model;
 pub mod oauth2;
 pub mod util;
