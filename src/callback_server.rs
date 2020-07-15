@@ -25,6 +25,9 @@ pub fn get_browser_response(auth_time: usize, client_state: &str) -> Result<Stri
     thread::spawn(move || {
         dotenv().ok();
         let mut callback_url = env::var("REDIRECT_URI").unwrap_or_default();
+        // Reddit expects the callback url to start with "http://" or "https://", However, tinyhttp does not
+        // not support url to start with either prefixes, but rather Server::http or Server::https gets called.
+        // thus, the prefix has to be removed if it exists
         callback_url = chomp_http_prefix(&callback_url);
         let server = Server::http(callback_url).unwrap();
         for request in server.incoming_requests() {
