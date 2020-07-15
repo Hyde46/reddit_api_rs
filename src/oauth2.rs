@@ -225,7 +225,13 @@ impl RedditOAuth {
             "Authorization: Basic {}",
             self.client_credentials.client_secret
         );
-        post(base_url, &data_string, &data_header);
+        let answer = post(base_url, &data_string, &data_header);
+        // Only one reason for non-empty response exists
+        if answer != "" {
+            return Err(
+                "Client credentials sent as HTTP Basic Authorization were invalid".to_string(),
+            );
+        }
         Ok(())
     }
 
