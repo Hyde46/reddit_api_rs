@@ -121,8 +121,8 @@ impl RedditOAuth {
         self.oauth_state = OAuthState::IDLE;
         self
     }
-    /// Authorize user by opening default browser and present reddit authorization dialog
-    /// to receive Bearer Token
+    /// Authorize user by opening default browser and present reddit authorization dialog.
+    /// This needs user interaction to receive Bearer Token
     /// # Arguments
     ///
     /// * `scope` - String of concatenated scopes the bearer token should have authorization of
@@ -154,6 +154,7 @@ impl RedditOAuth {
         params.insert("redirect_uri".to_owned(), self.callback_url.clone());
         let query_string = convert_map_to_string(&params);
         let authorize_url = format!("https://www.reddit.com/api/v1/authorize?{}", query_string);
+        // Open Dialog window
         match open_browser(&authorize_url) {
             Err(e) => {
                 self.oauth_state = OAuthState::ERROR;
@@ -162,6 +163,7 @@ impl RedditOAuth {
             }
             _ => {}
         }
+        // Start local proxy server and wait for reddit response
         match get_browser_response(120, &self.state_string) {
             Ok(code) => {
                 self.oauth_state = OAuthState::AUTHORIZED;

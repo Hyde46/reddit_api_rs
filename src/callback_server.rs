@@ -1,10 +1,15 @@
 //Built in libraries
+use std::env;
 use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
 
 //Thrid party libraries
+use dotenv::dotenv;
 use tiny_http::Server;
+use tiny_http::ServerConfig;
+
+use super::util::chomp_http_prefix;
 
 struct ResponseBox {
     has_error: bool,
@@ -18,7 +23,10 @@ pub fn get_browser_response(auth_time: usize, client_state: &str) -> Result<Stri
     let (tx_authentication, rx) = mpsc::channel();
     let tx_countdown = mpsc::Sender::clone(&tx_authentication);
     thread::spawn(move || {
-        let server = Server::http("127.0.0.1:8000").unwrap();
+        dotenv().ok();
+        let mut callback_url = env::var("REDIRECT_URI").unwrap_or_default();
+        callback_url = chomp_http_prefix(&callback_url);
+        let server = Server::http(callback_url).unwrap();
         for request in server.incoming_requests() {
             let request_url = request.url().to_string().clone();
             let parameter_string: Vec<&str> = request_url.split("/?").collect();

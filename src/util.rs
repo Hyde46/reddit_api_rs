@@ -51,6 +51,17 @@ pub fn generate_random_string(length: usize) -> String {
         .collect()
 }
 
+/// Checks if first 7 chars are equal to "http://" and removes them if they exist
+pub fn chomp_http_prefix(url: &str) -> String {
+    let slice = &url[..7];
+    let rest = &url[7..];
+    if slice == "http://" {
+        rest.to_string()
+    } else {
+        url.to_string()
+    }
+}
+
 pub fn open_browser(url: &str) -> Result<(), String> {
     if !webbrowser::open(url).is_ok() {
         return Err("Could not open browser. Is a default browser set?".to_owned());

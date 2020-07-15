@@ -15,6 +15,7 @@ use super::oauth2::OAuthState;
 use super::oauth2::RedditApiScope;
 use super::oauth2::RedditClientCredentials;
 use super::oauth2::RedditOAuth;
+use super::VERSION;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 /// Reddit API client.
@@ -124,10 +125,10 @@ impl Reddit {
         if !self.is_built {
             return Err("Object not built. Run `build()` before calling this method.".to_string());
         }
-        let user_agent_header = "User-Agent: RVP/0.1 by Gitrog_Frog";
+        let user_agent_header = format!("User-Agent: reddit_api/{}", VERSION);
         let mut easy = Easy::new();
         easy.url(&complete_url).unwrap();
-        easy.useragent(user_agent_header).unwrap();
+        easy.useragent(&user_agent_header).unwrap();
 
         if let Some(p) = payload {
             let mut list = List::new();
