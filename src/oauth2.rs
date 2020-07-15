@@ -1,3 +1,5 @@
+//! OAuth2 authentication methods for reddit API
+
 //Built in libraries
 use std::collections::HashMap;
 use std::env;
@@ -74,11 +76,11 @@ impl std::fmt::Display for RedditApiScope {
 pub struct RedditOAuth {
     pub callback_url: String,
     pub oauth_state: OAuthState,
-    /// If OAuthClient is in error state, then displays last error
+    // If OAuthClient is in error state, then displays last error
     pub error_string: Option<String>,
-    /// Randomly generated string to validate reddit oauth responses
+    // Randomly generated string to validate reddit oauth responses
     pub state_string: String,
-    /// Credentials for reddit_api application
+    // Credentials for reddit_api application
     pub client_credentials: RedditClientCredentials,
 }
 impl RedditOAuth {
@@ -119,60 +121,8 @@ impl RedditOAuth {
         self.oauth_state = OAuthState::IDLE;
         self
     }
-
-    /// Request access token
-    /// # Arguments
-    ///
-    /// * `state` - State string returned by reddit authorization process
-    ///
-    /// # Returns
-    /// `Option<OAuthToken>` If authorization was successfull, OAuthToken is set, otherwise `RedditOAuth.oauth_state=OAuthState::error` with an error message in `RedditOAuth.error_string`
-    /// If duration is `permanent`, bearer token will be invalid after one hour. The token has to be refreshed with the `refresh_token`
-    fn get_initial_access_token(&self, state: &str) -> Option<OAuthToken> {
-        let data_field_string = format!(
-            "grant_type=authorization_code&code={}&redirect_uri={}",
-            state, self.callback_url
-        );
-        let data_header = format!(
-            "Authorization: Basic {}",
-            self.client_credentials.client_secret
-        );
-        let base_url = "https://www.reddit.com/api/v1/access_token";
-        post(base_url, &data_field_string, &data_header)
-    }
-
-    /// Refresh bearer token when the previous one expired
-    /// # Arguments
-    ///
-    /// * `refresh_token` - String of refresh token
-    /// # Returns
-    /// `Option<OAuthToken>` If authorization was successfull, OAuthToken is set, otherwise `RedditOAuth.oauth_state=OAuthState::error` with an error message in `RedditOAuth.error_string`
-    /// If duration is `permanent`, bearer token will be invalid after one hour. The token has to be refreshed with the `refresh_token`
-    pub fn refresh_token(&self, refresh_token: &str) -> Option<OAuthToken> {
-        let data_string = format!("grant_type=refresh_token&refresh_token={}", refresh_token);
-        let data_header = format!(
-            "Authorization: Basic {}",
-            self.client_credentials.client_secret
-        );
-        let base_url = "https://www.reddit.com/api/v1/access_token";
-        let oauth_token = post(base_url, &data_string, &data_header);
-        // Reddit API does not return a value for the refresh token again.
-        // Add old `refresh_token` value to newly generated token
-        if let Some(t) = oauth_token {
-            return Some(OAuthToken {
-                access_token: t.access_token,
-                token_type: t.token_type,
-                expires_in: t.expires_in,
-                scope: t.scope,
-                refresh_token: refresh_token.to_string(),
-            });
-        }
-        return None;
-    }
-
     /// Authorize user by opening default browser and present reddit authorization dialog
     /// to receive Bearer Token
-    ///
     /// # Arguments
     ///
     /// * `scope` - String of concatenated scopes the bearer token should have authorization of
@@ -181,7 +131,6 @@ impl RedditOAuth {
     /// # Returns
     /// `Option<OAuthToken>` If authorization was successfull, OAuthToken is set, otherwise `RedditOAuth.oauth_state=OAuthState::error` with an error message in `RedditOAuth.error_string`
     /// If duration is `permanent`, bearer token will be invalid after one hour. The token has to be refreshed with the `refresh_token`
-    ///
     pub fn authorize_client(
         &mut self,
         scope: &str,
@@ -224,6 +173,83 @@ impl RedditOAuth {
                 return None;
             }
         }
+    }
+
+    /// Refresh bearer token when the previous one expired
+    /// # Arguments
+    ///
+    /// * `to_refresh` - Old bearer token which should be refreshed
+    /// # Returns
+    /// `Option<OAuthToken>` If authorization was successfull, OAuthToken is set, otherwise `RedditOAuth.oauth_state=OAuthState::error` with an error message in `RedditOAuth.error_string`
+    /// If duration is `permanent`, bearer token will be invalid after one hour. The token has to be refreshed with the `refresh_token`
+    pub fn refresh_token(&mut self, to_refresh: &OAuthToken) -> Option<OAuthToken> {
+        if to_refresh.refresh_token == "" {
+            // Token not refreshable
+            self.error_string = Some("Token not refreshable `refresh_token` is empty".to_string());
+            self.oauth_state = OAuthState::ERROR;
+            return None;
+        }
+        let base_url = "https://www.reddit.com/api/v1/access_token";
+        let data_string = format!(
+            "grant_type=refresh_token&refresh_token={}",
+            to_refresh.refresh_token
+        );
+        let data_header = format!(
+            "Authorization: Basic {}",
+            self.client_credentials.client_secret
+        );
+        let answer = post(base_url, &data_string, &data_header);
+        let bearer_token: OAuthToken = serde_json::from_str(&answer).unwrap();
+        // Reddit API does not return a value for the refresh token again.
+        // Add old `refresh_token` value to newly generated token
+        return Some(OAuthToken {
+            access_token: bearer_token.access_token,
+            token_type: bearer_token.token_type,
+            expires_in: bearer_token.expires_in,
+            scope: bearer_token.scope,
+            refresh_token: to_refresh.refresh_token.to_string(),
+        });
+    }
+
+    /// Revoke a token by hand.
+    /// # Arguments
+    ///
+    /// * `to_revoke` - Token to revoke its access
+    pub fn revoke_token(&mut self, to_revoke: &OAuthToken) -> Result<(), String> {
+        let base_url = "https://www.reddit.com/api/v1/revoke_token";
+        let data_string = format!(
+            "token={}&token_type_hint=access_token",
+            to_revoke.access_token
+        );
+        let data_header = format!(
+            "Authorization: Basic {}",
+            self.client_credentials.client_secret
+        );
+        post(base_url, &data_string, &data_header);
+        Ok(())
+    }
+
+    /// Request access token
+    /// # Arguments
+    ///
+    /// * `state` - State string returned by reddit authorization process
+    ///
+    /// # Returns
+    /// `Option<OAuthToken>` If authorization was successfull, OAuthToken is set, otherwise `RedditOAuth.oauth_state=OAuthState::error` with an error message in `RedditOAuth.error_string`
+    /// If duration is `permanent`, bearer token will be invalid after one hour. The token has to be refreshed with the `refresh_token`
+    pub fn get_initial_access_token(&self, state: &str) -> Option<OAuthToken> {
+        let data_field_string = format!(
+            "grant_type=authorization_code&code={}&redirect_uri={}",
+            state, self.callback_url
+        );
+        let data_header = format!(
+            "Authorization: Basic {}",
+            self.client_credentials.client_secret
+        );
+        let base_url = "https://www.reddit.com/api/v1/access_token";
+        let answer = post(base_url, &data_field_string, &data_header);
+        let bearer_token: OAuthToken = serde_json::from_str(&answer).unwrap();
+        return Some(bearer_token);
     }
 }
 

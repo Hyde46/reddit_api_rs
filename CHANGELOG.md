@@ -3,6 +3,7 @@
 
 - Add functionality to refresh bearer token
 - Extract `post` function from `callback_server.rs` to simplify that authentication step
+- Add examples  [ `authenticate_user.rs` , `refresh_token.rs` ]
 
 ## 0.1.0 (2020/10/07)
 

@@ -13,10 +13,5 @@ fn main() {
     // Authenticate user. Returns bearer token
     let bearer_token =
         reddit_oauth.authorize_client(&scope_string, Some(AuthorizationTime::permanent));
-
-    if let Some(token) = bearer_token {
-        // Only if bearer token has `AuthorizationTime::permanent`, the token can be refreshed
-        let refreshed_token = reddit_oauth.refresh_token(&token);
-        println!("Token refreshed!");
-    }
+    println!("Authenticated!");
 }

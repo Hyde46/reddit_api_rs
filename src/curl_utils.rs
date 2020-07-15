@@ -15,7 +15,7 @@ use super::model::token::OAuthToken;
 /// * `complete_url` - url for curl request
 /// * `payload` - payload for post request, if request uses POST
 /// * `header` - header data
-pub fn post(complete_url: &str, payload: &str, header: &str) -> Option<OAuthToken> {
+pub fn post(complete_url: &str, payload: &str, header: &str) -> String {
     let user_agent_header = "User-Agent: reddit_api/0.1 by Gitrog_Frog";
     let mut easy = Easy::new();
 
@@ -46,6 +46,5 @@ pub fn post(complete_url: &str, payload: &str, header: &str) -> Option<OAuthToke
             .unwrap();
         transfer.perform().unwrap();
     };
-    let bearer_token: OAuthToken = serde_json::from_str(&html).unwrap();
-    return Some(bearer_token);
+    return html;
 }
