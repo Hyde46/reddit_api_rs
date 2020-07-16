@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 // Own includes
+use super::model::sort_time::SortTime;
 use super::model::token::OAuthToken;
 use super::oauth2::OAuthState;
 use super::oauth2::RedditApiScope;
@@ -103,35 +104,54 @@ impl Reddit {
         self
     }
 
-    // 
+    //
     // `read` SCOPE
-    // 
+    //
 
     /// Get `/top` posts for the authenticated user
     /// `bearer_token` needs to be set for `Reddit` struct.
     /// `read` scope is required
     /// # Arguments
-    /// 
+    ///
     /// * `t` - Filter, one of (hour, day, week, month, year, all)
     /// * `after` - fullname of a thing. Only one of `after` and `before` should be specified
     /// * `before` - fullname of a thing. Only one of `after` and `before` should be specified
     /// * `count` - a positive integer. The number of items already seen in this listing. On the html site, the builder uses this to determine when to give values for `before` and `after` in the response ( default: 0 )
-    /// * `limit` - The maximum number of items desired ( default: 25, maximum: 100)
-    /// * `show` - (optional) optional parameter; if set,  filters such as "hide links that I have voted on" will be disabled.
-    /// * `sr_detail` - (optional) expand subreddits
-    pub fn get_top_posts(&self) -> Result<(), String> {
+    /// * `limit` - The maximum number of items desired ( maximum: 100)
+    /// * `show` - filters such as "hide links that I have voted on" will be disabled.
+    /// * `sr_detail` - expand subreddits
+    pub fn get_top_posts(
+        &self,
+        t: &SortTime,
+        after: &str,
+        before: &str,
+        count: u32,
+        limit: u32,
+        show: bool,
+        sr_detail: bool,
+    ) -> Result<(), String> {
+        // Validate parameters
+        if limit > 100 {
+            return Err("Limit set too high. Maximum is 100".to_owned());
+        }
+        if after != "" && before != "" {
+            return Err(
+                "Set `after` XOR `before`. Do not set both to a specific value.".to_owned(),
+            );
+        }
+        // Check if bearer token is set
         if let Some(token) = &self.bearer_token {
             // Check if correct scope is set for token
             if !token.scope.contains("read") {
                 return Err("Insufficient scope rights. Need scope: `read`.".to_owned());
             } else {
+                // Request top posts with set parameters
                 return Ok(());
             }
         } else {
             return Err("Bearer Token not set. Authentication necessary for ".to_owned());
         }
     }
-
 }
 
 #[cfg(test)]
@@ -163,15 +183,5 @@ mod tests {
     #[should_panic(expected = "No prefixes provided. Cannot communicate with reddit API endpoint!")]
     fn test_use_reddit_without_basic_prefix() {
         Reddit::default().basic_prefix("").build();
-    }
-
-    #[test]
-    fn test_get_but_not_built() {
-        let reddit = Reddit::default();
-        let result = reddit.get("", &mut HashMap::new());
-        assert_eq!(
-            result,
-            Err("Object not built. Run `build()` before calling this method.".to_string())
-        );
     }
 }
