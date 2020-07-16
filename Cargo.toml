@@ -1,6 +1,6 @@
 [package]
 name = "reddit_api"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Hyde46 <denis.heid@protonmail.com>"]
 keywords=["reddit","api"]
 edition = "2018"

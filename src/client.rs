@@ -11,12 +11,15 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 // Own includes
+use super::curl_utils::*;
+use super::model::listing::Listing;
 use super::model::sort_time::SortTime;
 use super::model::token::OAuthToken;
 use super::oauth2::OAuthState;
 use super::oauth2::RedditApiScope;
 use super::oauth2::RedditClientCredentials;
 use super::oauth2::RedditOAuth;
+use super::util::convert_map_to_string;
 use super::VERSION;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -113,6 +116,7 @@ impl Reddit {
     /// `read` scope is required
     /// # Arguments
     ///
+    /// * `subreddit` - subreddit name to fetch hot posts from. E.g. /r/rust. If Option not set, hot posts from frontpage are fetched
     /// * `t` - Filter, one of (hour, day, week, month, year, all)
     /// * `after` - fullname of a thing. Only one of `after` and `before` should be specified
     /// * `before` - fullname of a thing. Only one of `after` and `before` should be specified
@@ -122,7 +126,8 @@ impl Reddit {
     /// * `sr_detail` - expand subreddits
     pub fn get_top_posts(
         &self,
-        t: &SortTime,
+        subreddit: Option<String>,
+        t: SortTime,
         after: &str,
         before: &str,
         count: u32,
@@ -139,6 +144,12 @@ impl Reddit {
                 "Set `after` XOR `before`. Do not set both to a specific value.".to_owned(),
             );
         }
+        // Get subreddit to filter top posts from
+        let subreddit_string = if let Some(sub) = subreddit {
+            sub
+        } else {
+            "".to_owned()
+        };
         // Check if bearer token is set
         if let Some(token) = &self.bearer_token {
             // Check if correct scope is set for token
@@ -146,6 +157,29 @@ impl Reddit {
                 return Err("Insufficient scope rights. Need scope: `read`.".to_owned());
             } else {
                 // Request top posts with set parameters
+                // build authorization HashMap
+                let mut params: HashMap<String, String> = HashMap::new();
+                params.insert("t".to_owned(), t.to_string());
+                params.insert("limit".to_owned(), limit.to_string());
+                params.insert("before".to_owned(), before.to_owned());
+                params.insert("after".to_owned(), after.to_owned());
+                params.insert("count".to_owned(), count.to_string());
+                params.insert("show".to_owned(), show.to_string());
+                params.insert("sr_detail".to_owned(), sr_detail.to_string());
+                let query_string = convert_map_to_string(&params);
+                let url = format!(
+                    "https://www.reddit.com{}/top/.json?{}",
+                    subreddit_string, query_string
+                );
+                let data_header = format!(
+                    "Authorization: Basic {}",
+                    self.client_credentials.client_secret
+                );
+                println!("{}", url);
+                let answer = get(&url, &data_header);
+                println!("{}", answer);
+                let listing: Listing = serde_json::from_str(&answer).unwrap();
+                println!("{:?}", listing);
                 return Ok(());
             }
         } else {

@@ -10,7 +10,7 @@ use serde_json::Value;
 use super::model::token::OAuthToken;
 use super::VERSION;
 
-/// Curl request
+/// POST Curl request
 /// # Arguments
 ///
 /// * `complete_url` - url for curl request
@@ -39,6 +39,37 @@ pub fn post(complete_url: &str, payload: &str, header: &str) -> String {
         transfer
             .read_function(|buf| Ok(data_field.read(buf).unwrap_or(0)))
             .unwrap();
+        transfer
+            .write_function(|data| {
+                html = String::from_utf8(Vec::from(data)).unwrap();
+                Ok(data.len())
+            })
+            .unwrap();
+        transfer.perform().unwrap();
+    };
+    return html;
+}
+
+/// GET Curl request
+/// # Arguments
+///
+/// * `complete_url` - url for curl request
+/// * `header` - header data
+pub fn get(complete_url: &str, header: &str) -> String {
+    let user_agent_header = format!("User-Agent: reddit_api/{}", VERSION);
+    let mut easy = Easy::new();
+
+    easy.url(&complete_url).unwrap();
+    easy.useragent(&user_agent_header).unwrap();
+
+    // Set Header
+    let mut list = List::new();
+    list.append(header).unwrap();
+    easy.http_headers(list).unwrap();
+
+    let mut html: String = String::new();
+    {
+        let mut transfer = easy.transfer();
         transfer
             .write_function(|data| {
                 html = String::from_utf8(Vec::from(data)).unwrap();

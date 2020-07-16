@@ -1,6 +1,7 @@
 extern crate reddit_api;
 
 use reddit_api::client::Reddit;
+use reddit_api::model::sort_time::SortTime;
 use reddit_api::oauth2::{AuthorizationTime, RedditApiScope, RedditOAuth};
 use reddit_api::util::convert_scope_vec_to_string;
 
@@ -16,7 +17,7 @@ fn main() {
         reddit_oauth.authorize_client(&scope_string, Some(AuthorizationTime::permanent));
     if let Some(token) = bearer_token {
         let reddit = Reddit::default().bearer_token(token).build();
-        let answer = reddit.get_top_posts();
+        let answer = reddit.get_top_posts(None, SortTime::all, "", "", 0, 1, false, false);
         match answer {
             Ok(_) => {}
             Err(e) => println!("{}", e),
