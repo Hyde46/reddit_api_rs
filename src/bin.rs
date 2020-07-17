@@ -17,7 +17,7 @@ fn main() {
         reddit_oauth.authorize_client(&scope_string, Some(AuthorizationTime::permanent));
     if let Some(token) = bearer_token {
         let reddit = Reddit::default().bearer_token(token).build();
-        let answer = reddit.get_top_posts(None, SortTime::all, "", "", 0, 1, false, false);
+        let answer = reddit.get_top_posts(None, SortTime::all, "", "", 0, 20, false, false);
         match answer {
             Ok(_) => {}
             Err(e) => println!("{}", e),

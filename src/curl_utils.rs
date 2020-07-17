@@ -33,6 +33,7 @@ pub fn post(complete_url: &str, payload: &str, header: &str) -> String {
     easy.post(true).unwrap();
     easy.post_field_size(data_field.len() as u64).unwrap();
 
+    let mut return_data: Vec<String> = Vec::new();
     let mut html: String = String::new();
     {
         let mut transfer = easy.transfer();
@@ -42,12 +43,13 @@ pub fn post(complete_url: &str, payload: &str, header: &str) -> String {
         transfer
             .write_function(|data| {
                 html = String::from_utf8(Vec::from(data)).unwrap();
+                return_data.push(html.clone());
                 Ok(data.len())
             })
             .unwrap();
         transfer.perform().unwrap();
     };
-    return html;
+    return_data.join("")
 }
 
 /// GET Curl request
@@ -67,16 +69,18 @@ pub fn get(complete_url: &str, header: &str) -> String {
     list.append(header).unwrap();
     easy.http_headers(list).unwrap();
 
+    let mut return_data: Vec<String> = Vec::new();
     let mut html: String = String::new();
     {
         let mut transfer = easy.transfer();
         transfer
             .write_function(|data| {
                 html = String::from_utf8(Vec::from(data)).unwrap();
+                return_data.push(html.clone());
                 Ok(data.len())
             })
             .unwrap();
         transfer.perform().unwrap();
     };
-    return html;
+    return_data.join("")
 }

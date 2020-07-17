@@ -136,8 +136,8 @@ impl Reddit {
         sr_detail: bool,
     ) -> Result<(), String> {
         // Validate parameters
-        if limit > 100 {
-            return Err("Limit set too high. Maximum is 100".to_owned());
+        if limit > 100 || limit <= 0 {
+            return Err("Limit bounds are [1, 100]".to_owned());
         }
         if after != "" && before != "" {
             return Err(
@@ -168,7 +168,7 @@ impl Reddit {
                 params.insert("sr_detail".to_owned(), sr_detail.to_string());
                 let query_string = convert_map_to_string(&params);
                 let url = format!(
-                    "https://www.reddit.com{}/top/.json?{}",
+                    "https://www.reddit.com{}/.json?{}",
                     subreddit_string, query_string
                 );
                 let data_header = format!(
@@ -177,9 +177,7 @@ impl Reddit {
                 );
                 println!("{}", url);
                 let answer = get(&url, &data_header);
-                println!("{}", answer);
                 let listing: Listing = serde_json::from_str(&answer).unwrap();
-                println!("{:?}", listing);
                 return Ok(());
             }
         } else {

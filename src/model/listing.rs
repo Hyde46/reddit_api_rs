@@ -12,7 +12,7 @@ pub struct Listing {
 pub struct ListingData {
     modhash: String,
     dist: u32,
-    before: String,
-    after: String,
+    before: Option<String>,
+    after: Option<String>,
     children: Vec<RedditPost>,
 }
