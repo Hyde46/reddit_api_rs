@@ -118,7 +118,7 @@ pub struct RedditPostData {
     #[serde(skip_deserializing, skip_serializing)]
     pub media_metadata: Vec<String>,
     #[serde(skip_deserializing, skip_serializing)]
-    pub secure_media: Option<String>, 
+    pub secure_media: Option<String>,
     #[serde(skip_deserializing, skip_serializing)]
     pub media_embed: Vec<String>,
 }

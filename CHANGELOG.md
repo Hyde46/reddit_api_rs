@@ -4,6 +4,7 @@
 - Add functionality to refresh bearer token
 - Add examples  [ `authenticate_user.rs` , `refresh_token.rs`, `revoke_token.rs` ]
 - Add Listing and Post models
+- Add endpoints for posts sorted by : [hot,top,new,rising,best,controversial]
 
 ## 0.1.0 (2020/10/07)
 

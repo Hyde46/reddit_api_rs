@@ -111,12 +111,13 @@ impl Reddit {
     // `read` SCOPE
     //
 
-    /// Get `/top` posts for the authenticated user
+    
+    /// Get `/best` posts
     /// `bearer_token` needs to be set for `Reddit` struct.
     /// `read` scope is required
     /// # Arguments
     ///
-    /// * `subreddit` - subreddit name to fetch hot posts from. E.g. /r/rust. If Option not set, hot posts from frontpage are fetched
+    /// * `subreddit` - subreddit name to fetch posts from. E.g. /r/rust. If Option not set, posts from frontpage are fetched
     /// * `t` - Filter, one of (hour, day, week, month, year, all)
     /// * `after` - fullname of a thing. Only one of `after` and `before` should be specified
     /// * `before` - fullname of a thing. Only one of `after` and `before` should be specified
@@ -124,6 +125,105 @@ impl Reddit {
     /// * `limit` - The maximum number of items desired ( maximum: 100)
     /// * `show` - filters such as "hide links that I have voted on" will be disabled.
     /// * `sr_detail` - expand subreddits
+    ///
+    /// # Returns
+    /// `Result<Listing, String>` Either Listing of posts or Error message
+    pub fn get_best_posts(
+        &self,
+        subreddit: Option<String>,
+        after: &str,
+        before: &str,
+        count: u32,
+        limit: u32,
+        show: bool,
+        sr_detail: bool,
+    ) -> Result<Listing, String> {
+        let sorting = "best".to_string();
+        self.get_post_by_sorting(
+            sorting, subreddit, None, after, before, count, limit, show, sr_detail,
+        )
+    }
+
+    /// Get `/rising` posts
+    /// `bearer_token` needs to be set for `Reddit` struct.
+    /// `read` scope is required
+    /// # Arguments
+    ///
+    /// * `subreddit` - subreddit name to fetch posts from. E.g. /r/rust. If Option not set, posts from frontpage are fetched
+    /// * `t` - Filter, one of (hour, day, week, month, year, all)
+    /// * `after` - fullname of a thing. Only one of `after` and `before` should be specified
+    /// * `before` - fullname of a thing. Only one of `after` and `before` should be specified
+    /// * `count` - a positive integer. The number of items already seen in this listing. On the html site, the builder uses this to determine when to give values for `before` and `after` in the response ( default: 0 )
+    /// * `limit` - The maximum number of items desired ( maximum: 100)
+    /// * `show` - filters such as "hide links that I have voted on" will be disabled.
+    /// * `sr_detail` - expand subreddits
+    ///
+    /// # Returns
+    /// `Result<Listing, String>` Either Listing of posts or Error message
+    pub fn get_rising_posts(
+        &self,
+        subreddit: Option<String>,
+        after: &str,
+        before: &str,
+        count: u32,
+        limit: u32,
+        show: bool,
+        sr_detail: bool,
+    ) -> Result<Listing, String> {
+        let sorting = "rising".to_string();
+        self.get_post_by_sorting(
+            sorting, subreddit, None, after, before, count, limit, show, sr_detail,
+        )
+    }
+
+    /// Get `/new` posts
+    /// `bearer_token` needs to be set for `Reddit` struct.
+    /// `read` scope is required
+    /// # Arguments
+    ///
+    /// * `subreddit` - subreddit name to fetch posts from. E.g. /r/rust. If Option not set, posts from frontpage are fetched
+    /// * `t` - Filter, one of (hour, day, week, month, year, all)
+    /// * `after` - fullname of a thing. Only one of `after` and `before` should be specified
+    /// * `before` - fullname of a thing. Only one of `after` and `before` should be specified
+    /// * `count` - a positive integer. The number of items already seen in this listing. On the html site, the builder uses this to determine when to give values for `before` and `after` in the response ( default: 0 )
+    /// * `limit` - The maximum number of items desired ( maximum: 100)
+    /// * `show` - filters such as "hide links that I have voted on" will be disabled.
+    /// * `sr_detail` - expand subreddits
+    ///
+    /// # Returns
+    /// `Result<Listing, String>` Either Listing of posts or Error message
+    pub fn get_new_posts(
+        &self,
+        subreddit: Option<String>,
+        after: &str,
+        before: &str,
+        count: u32,
+        limit: u32,
+        show: bool,
+        sr_detail: bool,
+    ) -> Result<Listing, String> {
+        let sorting = "new".to_string();
+        self.get_post_by_sorting(
+            sorting, subreddit, None, after, before, count, limit, show, sr_detail,
+        )
+    }
+
+    /// Get `/top` posts 
+    /// `bearer_token` needs to be set for `Reddit` struct.
+    /// `read` scope is required
+    /// # Arguments
+    ///
+    /// * `subreddit` - subreddit name to fetch posts from. E.g. /r/rust. If Option not set, posts from frontpage are fetched
+    /// * `t` - Filter, one of (hour, day, week, month, year, all)
+    /// * `after` - fullname of a thing. Only one of `after` and `before` should be specified
+    /// * `before` - fullname of a thing. Only one of `after` and `before` should be specified
+    /// * `count` - a positive integer. The number of items already seen in this listing. On the html site, the builder uses this to determine when to give values for `before` and `after` in the response ( default: 0 )
+    /// * `limit` - The maximum number of items desired ( maximum: 100)
+    /// * `show` - filters such as "hide links that I have voted on" will be disabled.
+    /// * `sr_detail` - expand subreddits
+    ///
+    /// # Returns
+    /// `Result<Listing, String>` Either Listing of posts or Error message
     pub fn get_top_posts(
         &self,
         subreddit: Option<String>,
@@ -134,7 +234,58 @@ impl Reddit {
         limit: u32,
         show: bool,
         sr_detail: bool,
-    ) -> Result<(), String> {
+    ) -> Result<Listing, String> {
+        let sorting = "top".to_string();
+        self.get_post_by_sorting(
+            sorting, subreddit, Some(t), after, before, count, limit, show, sr_detail,
+        )
+    }
+
+    /// Get `/controversial` posts
+    /// `bearer_token` needs to be set for `Reddit` struct.
+    /// `read` scope is required
+    /// # Arguments
+    ///
+    /// * `subreddit` - subreddit name to fetch posts from. E.g. /r/rust. If Option not set, posts from frontpage are fetched
+    /// * `t` - Filter, one of (hour, day, week, month, year, all)
+    /// * `after` - fullname of a thing. Only one of `after` and `before` should be specified
+    /// * `before` - fullname of a thing. Only one of `after` and `before` should be specified
+    /// * `count` - a positive integer. The number of items already seen in this listing. On the html site, the builder uses this to determine when to give values for `before` and `after` in the response ( default: 0 )
+    /// * `limit` - The maximum number of items desired ( maximum: 100)
+    /// * `show` - filters such as "hide links that I have voted on" will be disabled.
+    /// * `sr_detail` - expand subreddits
+    ///
+    /// # Returns
+    /// `Result<Listing, String>` Either Listing of posts or Error message
+    pub fn get_controversial_posts(
+        &self,
+        subreddit: Option<String>,
+        t: SortTime,
+        after: &str,
+        before: &str,
+        count: u32,
+        limit: u32,
+        show: bool,
+        sr_detail: bool,
+    ) -> Result<Listing, String> {
+        let sorting = "controversial".to_string();
+        self.get_post_by_sorting(
+            sorting, subreddit, Some(t), after, before, count, limit, show, sr_detail,
+        )
+    }
+
+    fn get_post_by_sorting(
+        &self,
+        sorting: String,
+        subreddit: Option<String>,
+        t: Option<SortTime>,
+        after: &str,
+        before: &str,
+        count: u32,
+        limit: u32,
+        show: bool,
+        sr_detail: bool,
+    ) -> Result<Listing, String> {
         // Validate parameters
         if limit > 100 || limit <= 0 {
             return Err("Limit bounds are [1, 100]".to_owned());
@@ -143,6 +294,12 @@ impl Reddit {
             return Err(
                 "Set `after` XOR `before`. Do not set both to a specific value.".to_owned(),
             );
+        }
+        // Get SortTime
+        let sort_time_filter = if let Some(sort_t) = t {
+            sort_t.to_string()
+        } else {
+            "".to_string()
         }
         // Get subreddit to filter top posts from
         let subreddit_string = if let Some(sub) = subreddit {
@@ -159,7 +316,7 @@ impl Reddit {
                 // Request top posts with set parameters
                 // build authorization HashMap
                 let mut params: HashMap<String, String> = HashMap::new();
-                params.insert("t".to_owned(), t.to_string());
+                params.insert("t".to_owned(), sort_time_filter);
                 params.insert("limit".to_owned(), limit.to_string());
                 params.insert("before".to_owned(), before.to_owned());
                 params.insert("after".to_owned(), after.to_owned());
@@ -168,8 +325,8 @@ impl Reddit {
                 params.insert("sr_detail".to_owned(), sr_detail.to_string());
                 let query_string = convert_map_to_string(&params);
                 let url = format!(
-                    "https://www.reddit.com{}/.json?{}",
-                    subreddit_string, query_string
+                    "https://www.reddit.com{}/{}/.json?{}",
+                    subreddit_string, sorting, query_string
                 );
                 let data_header = format!(
                     "Authorization: Basic {}",
@@ -178,7 +335,7 @@ impl Reddit {
                 println!("{}", url);
                 let answer = get(&url, &data_header);
                 let listing: Listing = serde_json::from_str(&answer).unwrap();
-                return Ok(());
+                return Ok(listing);
             }
         } else {
             return Err("Bearer Token not set. Authentication necessary for ".to_owned());
