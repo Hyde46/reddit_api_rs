@@ -1,6 +1,7 @@
-## 0.1.2 
+## 0.1.2 - WIP
 
 - Add examples [ `best_posts.rs` , `top_posts.rs` ]
+- Add Generics to Listings. Can use as `Listing<Post>` or `Listing<Comment>`
 
 ## 0.1.1 (2020/15/07)
 
