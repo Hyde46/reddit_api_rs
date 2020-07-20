@@ -129,7 +129,7 @@ impl Reddit {
     /// `Result<Listing, String>` Either Listing of posts or Error message
     pub fn best(
         &self,
-        subreddit: Option<String>,
+        subreddit: Option<&str>,
         after: &str,
         before: &str,
         count: u32,
@@ -138,6 +138,38 @@ impl Reddit {
         sr_detail: bool,
     ) -> Result<Listing, String> {
         let sorting = "best".to_string();
+        self.get_post_by_sorting(
+            sorting, subreddit, None, after, before, count, limit, show, sr_detail,
+        )
+    }
+
+    /// Get `/hot` posts
+    /// `bearer_token` needs to be set for `Reddit` struct.
+    /// `read` scope is required
+    /// # Arguments
+    ///
+    /// * `subreddit` - subreddit name to fetch posts from. E.g. /r/rust. If Option not set, posts from frontpage are fetched
+    /// * `t` - Filter, one of (hour, day, week, month, year, all)
+    /// * `after` - fullname of a thing. Only one of `after` and `before` should be specified
+    /// * `before` - fullname of a thing. Only one of `after` and `before` should be specified
+    /// * `count` - a positive integer. The number of items already seen in this listing. On the html site, the builder uses this to determine when to give values for `before` and `after` in the response ( default: 0 )
+    /// * `limit` - The maximum number of items desired ( maximum: 100)
+    /// * `show` - filters such as "hide links that I have voted on" will be disabled.
+    /// * `sr_detail` - expand subreddits
+    ///
+    /// # Returns
+    /// `Result<Listing, String>` Either Listing of posts or Error message
+    pub fn hot(
+        &self,
+        subreddit: Option<&str>,
+        after: &str,
+        before: &str,
+        count: u32,
+        limit: u32,
+        show: bool,
+        sr_detail: bool,
+    ) -> Result<Listing, String> {
+        let sorting = "hot".to_string();
         self.get_post_by_sorting(
             sorting, subreddit, None, after, before, count, limit, show, sr_detail,
         )
@@ -161,7 +193,7 @@ impl Reddit {
     /// `Result<Listing, String>` Either Listing of posts or Error message
     pub fn rising(
         &self,
-        subreddit: Option<String>,
+        subreddit: Option<&str>,
         after: &str,
         before: &str,
         count: u32,
@@ -193,7 +225,7 @@ impl Reddit {
     /// `Result<Listing, String>` Either Listing of posts or Error message
     pub fn new(
         &self,
-        subreddit: Option<String>,
+        subreddit: Option<&str>,
         after: &str,
         before: &str,
         count: u32,
@@ -225,7 +257,7 @@ impl Reddit {
     /// `Result<Listing, String>` Either Listing of posts or Error message
     pub fn top(
         &self,
-        subreddit: Option<String>,
+        subreddit: Option<&str>,
         t: SortTime,
         after: &str,
         before: &str,
@@ -266,7 +298,7 @@ impl Reddit {
     /// `Result<Listing, String>` Either Listing of posts or Error message
     pub fn controversial(
         &self,
-        subreddit: Option<String>,
+        subreddit: Option<&str>,
         t: SortTime,
         after: &str,
         before: &str,
@@ -292,7 +324,7 @@ impl Reddit {
     fn get_post_by_sorting(
         &self,
         sorting: String,
-        subreddit: Option<String>,
+        subreddit: Option<&str>,
         t: Option<SortTime>,
         after: &str,
         before: &str,
@@ -320,7 +352,7 @@ impl Reddit {
         let subreddit_string = if let Some(sub) = subreddit {
             sub
         } else {
-            "".to_owned()
+            ""
         };
         // Check if bearer token is set
         if let Some(token) = &self.bearer_token {
@@ -347,7 +379,6 @@ impl Reddit {
                     "Authorization: Basic {}",
                     self.client_credentials.client_secret
                 );
-                println!("{}", url);
                 let answer = get(&url, &data_header);
                 let listing: Listing = serde_json::from_str(&answer).unwrap();
                 return Ok(listing);

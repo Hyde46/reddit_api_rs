@@ -4,15 +4,15 @@ use serde_json::Value;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Listing {
-    kind: String,
-    data: ListingData,
+    pub kind: String,
+    pub data: ListingData,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ListingData {
-    modhash: String,
-    dist: u32,
-    before: Option<String>,
-    after: Option<String>,
-    children: Vec<RedditPost>,
+    pub modhash: String,
+    pub dist: u32,
+    pub before: Option<String>,
+    pub after: Option<String>,
+    pub children: Vec<RedditPost>,
 }
