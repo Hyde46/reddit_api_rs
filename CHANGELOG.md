@@ -1,3 +1,6 @@
+## 0.1.2
+
+- Add examples [ `best_posts.rs` , `top_posts.rs` ]
 
 ## 0.1.1 (2020/15/07)
 

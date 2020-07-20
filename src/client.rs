@@ -349,11 +349,7 @@ impl Reddit {
             "".to_string()
         };
         // Get subreddit to filter top posts from
-        let subreddit_string = if let Some(sub) = subreddit {
-            sub
-        } else {
-            ""
-        };
+        let subreddit_string = if let Some(sub) = subreddit { sub } else { "" };
         // Check if bearer token is set
         if let Some(token) = &self.bearer_token {
             // Check if correct scope is set for token

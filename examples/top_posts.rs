@@ -1,4 +1,3 @@
-
 extern crate rsreddit;
 
 use rsreddit::client::Reddit;
@@ -7,13 +6,7 @@ use rsreddit::oauth2::{AuthorizationTime, RedditApiScope, RedditOAuth};
 use rsreddit::util::convert_scope_vec_to_string;
 
 fn main() {
-    // Show hot posts for authorized user
-    // Works the same for:
-    // * reddit.hot()
-    // * reddit.controversial()
-    // * reddit.new()
-    // * reddit.rising()
-    // * reddit.best()
+    // Show top posts for authorized user
 
     // OAuth2 Authorization stuff
     let mut reddit_oauth = RedditOAuth::default().build();
@@ -26,9 +19,9 @@ fn main() {
     if let Some(token) = bearer_token {
         // Reddit client object
         let reddit = Reddit::default().bearer_token(token).build();
-        // Query hot posts of /r/rust with a limit of 20 posts
+        // Query top posts of /r/rust with a limit of 20 posts of the current day
         let answer = reddit
-            .hot(Some("/r/rust"), "", "", 0, 20, false, false)
+            .top(Some("/r/rust"), SortTime::day, "", "", 0, 20, false, false)
             .unwrap();
         // Get "after" tag from Listing to browse the following posts
         let after = answer.data.after.unwrap();
