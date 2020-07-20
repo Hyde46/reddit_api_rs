@@ -21,8 +21,14 @@ OAuth2 specific implementations:
 * Revoke bearer token
 
 ## Usage
+Add to your `Cargo.toml`:
 
-Get it from [GitHub](https://github.com/Hyde46/reddit_api_rs).
+``` toml
+[dependencies]
+rsreddit = "0.1.1"
+```
+
+Or get it from [GitHub](https://github.com/Hyde46/reddit_api_rs).
 
 ## Getting Started
 
