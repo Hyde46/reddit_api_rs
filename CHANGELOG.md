@@ -1,4 +1,4 @@
-## 0.1.2
+## 0.1.2 
 
 - Add examples [ `best_posts.rs` , `top_posts.rs` ]
 
