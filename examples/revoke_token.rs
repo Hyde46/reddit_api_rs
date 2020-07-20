@@ -1,7 +1,7 @@
-extern crate reddit_api;
+extern crate rsreddit;
 
-use reddit_api::oauth2::{AuthorizationTime, RedditApiScope, RedditOAuth};
-use reddit_api::util::convert_scope_vec_to_string;
+use rsreddit::oauth2::{AuthorizationTime, RedditApiScope, RedditOAuth};
+use rsreddit::util::convert_scope_vec_to_string;
 
 fn main() {
     let mut reddit_oauth = RedditOAuth::default().build();
