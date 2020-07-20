@@ -11,7 +11,7 @@ fn main() {
     // OAuth2 Authorization stuff
     let mut reddit_oauth = RedditOAuth::default().build();
     let mut scopes = Vec::new();
-    scopes.push(RedditApiScope::identity);
+    scopes.push(RedditApiScope::read);
     let scope_string = convert_scope_vec_to_string(&scopes);
     // Authenticate user. Returns bearer token
     let bearer_token =
@@ -26,7 +26,7 @@ fn main() {
         // Get "after" tag from Listing to browse the following posts
         let after = answer.data.after.unwrap();
         // Query hot posts after previous ones
-        let next_answer = reddit.top(None, SortTime::all, &after, "", 0, 20, false, false);
+        let next_answer = reddit.top(Some("/r/rust"), SortTime::day, &after, "", 0, 20, false, false);
         // Do stuff with Listing
         match next_answer {
             Ok(a) => println!("{:?}", a),
