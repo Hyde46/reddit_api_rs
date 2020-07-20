@@ -111,7 +111,6 @@ impl Reddit {
     // `read` SCOPE
     //
 
-    
     /// Get `/best` posts
     /// `bearer_token` needs to be set for `Reddit` struct.
     /// `read` scope is required
@@ -128,7 +127,7 @@ impl Reddit {
     ///
     /// # Returns
     /// `Result<Listing, String>` Either Listing of posts or Error message
-    pub fn get_best_posts(
+    pub fn best(
         &self,
         subreddit: Option<String>,
         after: &str,
@@ -160,7 +159,7 @@ impl Reddit {
     ///
     /// # Returns
     /// `Result<Listing, String>` Either Listing of posts or Error message
-    pub fn get_rising_posts(
+    pub fn rising(
         &self,
         subreddit: Option<String>,
         after: &str,
@@ -192,7 +191,7 @@ impl Reddit {
     ///
     /// # Returns
     /// `Result<Listing, String>` Either Listing of posts or Error message
-    pub fn get_new_posts(
+    pub fn new(
         &self,
         subreddit: Option<String>,
         after: &str,
@@ -208,7 +207,7 @@ impl Reddit {
         )
     }
 
-    /// Get `/top` posts 
+    /// Get `/top` posts
     /// `bearer_token` needs to be set for `Reddit` struct.
     /// `read` scope is required
     /// # Arguments
@@ -224,7 +223,7 @@ impl Reddit {
     ///
     /// # Returns
     /// `Result<Listing, String>` Either Listing of posts or Error message
-    pub fn get_top_posts(
+    pub fn top(
         &self,
         subreddit: Option<String>,
         t: SortTime,
@@ -237,7 +236,15 @@ impl Reddit {
     ) -> Result<Listing, String> {
         let sorting = "top".to_string();
         self.get_post_by_sorting(
-            sorting, subreddit, Some(t), after, before, count, limit, show, sr_detail,
+            sorting,
+            subreddit,
+            Some(t),
+            after,
+            before,
+            count,
+            limit,
+            show,
+            sr_detail,
         )
     }
 
@@ -257,7 +264,7 @@ impl Reddit {
     ///
     /// # Returns
     /// `Result<Listing, String>` Either Listing of posts or Error message
-    pub fn get_controversial_posts(
+    pub fn controversial(
         &self,
         subreddit: Option<String>,
         t: SortTime,
@@ -270,7 +277,15 @@ impl Reddit {
     ) -> Result<Listing, String> {
         let sorting = "controversial".to_string();
         self.get_post_by_sorting(
-            sorting, subreddit, Some(t), after, before, count, limit, show, sr_detail,
+            sorting,
+            subreddit,
+            Some(t),
+            after,
+            before,
+            count,
+            limit,
+            show,
+            sr_detail,
         )
     }
 
@@ -300,7 +315,7 @@ impl Reddit {
             sort_t.to_string()
         } else {
             "".to_string()
-        }
+        };
         // Get subreddit to filter top posts from
         let subreddit_string = if let Some(sub) = subreddit {
             sub
