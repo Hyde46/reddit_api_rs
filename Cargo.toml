@@ -8,9 +8,6 @@ license = "MIT OR Apache-2.0"
 description = "Lightweight Reddit API wrapper"
 homepage = "https://github.com/Hyde46/reddit_api_rs"
 repository = "https://github.com/Hyde46/reddit_api_rs"
-exclude = [
-    "src/bin.rs"
-]
 readme = "README.md"
 
 [lib]
