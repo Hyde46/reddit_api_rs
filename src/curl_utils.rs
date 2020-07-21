@@ -17,7 +17,7 @@ use super::VERSION;
 /// * `payload` - payload for post request, if request uses POST
 /// * `header` - header data
 pub fn post(complete_url: &str, payload: &str, header: &str) -> String {
-    let user_agent_header = format!("User-Agent: reddit_api/{}", VERSION);
+    let user_agent_header = format!("User-Agent: rsreddit:v{} (by /u/Gitrog_Frog)", VERSION);
     let mut easy = Easy::new();
 
     easy.url(&complete_url).unwrap();
@@ -58,7 +58,7 @@ pub fn post(complete_url: &str, payload: &str, header: &str) -> String {
 /// * `complete_url` - url for curl request
 /// * `header` - header data
 pub fn get(complete_url: &str, header: &str) -> String {
-    let user_agent_header = format!("User-Agent: reddit_api/{}", VERSION);
+    let user_agent_header = format!("User-Agent: rsreddit:v{} (by /u/Gitrog_Frog)", VERSION);
     let mut easy = Easy::new();
 
     easy.url(&complete_url).unwrap();

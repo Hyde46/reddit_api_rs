@@ -13,4 +13,4 @@ pub mod model;
 pub mod oauth2;
 pub mod util;
 
-static VERSION: &str = "0.1.1";
+static VERSION: &str = "0.1.2";

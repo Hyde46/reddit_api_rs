@@ -6,7 +6,6 @@ keywords=["reddit","api"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
 description = "Lightweight Reddit API wrapper"
-homepage = "https://github.com/Hyde46/reddit_api_rs"
 repository = "https://github.com/Hyde46/reddit_api_rs"
 readme = "README.md"
 

@@ -14,6 +14,7 @@ use serde_json::Value;
 use super::curl_utils::*;
 use super::model::listing::Listing;
 use super::model::listing::Post;
+use super::model::responses::comment_response::CommentResponse;
 use super::model::sort_time::SortTime;
 use super::model::token::OAuthToken;
 use super::oauth2::OAuthState;
@@ -32,6 +33,7 @@ use super::VERSION;
 pub struct Reddit {
     pub authorized_prefix: String,
     pub basic_prefix: String,
+    pub oauth_prefix: String,
     pub client_credentials: RedditClientCredentials,
     pub bearer_token: Option<OAuthToken>,
     is_built: bool,
@@ -49,7 +51,8 @@ impl Reddit {
     pub fn default() -> Reddit {
         Reddit {
             authorized_prefix: "https://www.reddit.com/api/v1/".to_owned(),
-            basic_prefix: "https://www.reddit.com/".to_owned(),
+            basic_prefix: "https://www.reddit.com".to_owned(),
+            oauth_prefix: "https://oauth.reddit.com".to_owned(),
             client_credentials: RedditClientCredentials::default(),
             bearer_token: None,
             is_built: false,
@@ -106,6 +109,44 @@ impl Reddit {
         }
         self.is_built = true;
         self
+    }
+
+    //
+    // `submit` SCOPE
+    //
+
+    /// Submit a new comment or reply to a message
+    /// # Arguments
+    /// * `thing_id` fullname of partent thing being replied to. Can be fullname of a link or fullname of a comment ( requires `submit` scope ).
+    /// * `text` Raw markdown text to comment
+    ///
+    /// TODO: add private messaging comments
+    pub fn comment(&self, thing_id: &str, text: &str) -> Result<(), String> {
+        // Check if bearer token is set
+        if let Some(token) = &self.bearer_token {
+            if !token.scope.contains("submit") {
+                return Err("Insufficient scope rights. Need scope: `submit`.".to_owned());
+            } else {
+                let endpoint = "/api/comment";
+                let url = format!("{}{}", self.oauth_prefix, endpoint);
+                let data_header = format!("Authorization: bearer {}", token.access_token);
+                let mut payload_map: HashMap<String, String> = HashMap::new();
+                payload_map.insert("api_type".to_owned(), "json".to_owned());
+                payload_map.insert("text".to_owned(), text.to_owned());
+                payload_map.insert("return_rtjson".to_owned(), "true".to_owned());
+                payload_map.insert("thing_id".to_owned(), thing_id.to_owned());
+                let payload_data = convert_map_to_string(&payload_map);
+                let answer = post(&url, &payload_data, &data_header);
+                let comment_response: CommentResponse = serde_json::from_str(&answer).unwrap();
+                if let Some(err) = comment_response.json {
+                    let err_msg = format!("[{}] - {}", err.errors[0][0], err.errors[0][1]);
+                    return Err(err_msg);
+                }
+                return Ok(());
+            }
+        } else {
+            return Err("Bearer Token not set. Authorization necessary for commenting".to_owned());
+        }
     }
 
     //
@@ -367,6 +408,7 @@ impl Reddit {
                 params.insert("count".to_owned(), count.to_string());
                 params.insert("show".to_owned(), show.to_string());
                 params.insert("sr_detail".to_owned(), sr_detail.to_string());
+                params.insert("raw_json".to_owned(), "1".to_string());
                 let query_string = convert_map_to_string(&params);
                 let url = format!(
                     "https://www.reddit.com{}/{}/.json?{}",
@@ -378,12 +420,10 @@ impl Reddit {
                 );
                 let answer = get(&url, &data_header);
                 let listing: Listing<Post> = serde_json::from_str(&answer).unwrap();
-                println!("Here! :)");
-                println!("{:?}", listing);
                 return Ok(listing);
             }
         } else {
-            return Err("Bearer Token not set. Authentication necessary for ".to_owned());
+            return Err("Bearer Token not set. Authorization necessary for this action".to_owned());
         }
     }
 }
@@ -395,7 +435,7 @@ mod tests {
     #[test]
     fn test_build_default_reddit() {
         let reddit = Reddit::default();
-        assert_eq!(reddit.basic_prefix, "https://www.reddit.com/".to_owned());
+        assert_eq!(reddit.basic_prefix, "https://www.reddit.com".to_owned());
         assert_eq!(
             reddit.authorized_prefix,
             "https://www.reddit.com/api/v1/".to_owned()

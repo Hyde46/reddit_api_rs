@@ -192,7 +192,7 @@ impl RedditOAuth {
             self.oauth_state = OAuthState::ERROR;
             return None;
         }
-        let base_url = "https://www.reddit.com/api/v1/access_token";
+        let base_url = "https://oauth.reddit.com/api/v1/access_token";
         let data_string = format!(
             "grant_type=refresh_token&refresh_token={}",
             to_refresh.refresh_token
@@ -219,7 +219,7 @@ impl RedditOAuth {
     ///
     /// * `to_revoke` - Token to revoke its access
     pub fn revoke_token(&mut self, to_revoke: &OAuthToken) -> Result<(), String> {
-        let base_url = "https://www.reddit.com/api/v1/revoke_token";
+        let base_url = "https://oauth.reddit.com/api/v1/revoke_token";
         let data_string = format!(
             "token={}&token_type_hint=access_token",
             to_revoke.access_token
