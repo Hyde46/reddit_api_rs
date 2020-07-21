@@ -2,7 +2,7 @@
 
 ## 0.1.2 - (2020/21/07)
 
-- Add examples [ `best_posts.rs` , `top_posts.rs` ]
+- Add examples [ `best_posts.rs` , `top_posts.rs`, `comment_thread.rs` ]
 - Add Generics to Listings. Can use as `Listing<Post>` or `Listing<Comment>`
 - Add comment endpoint for threads
 
