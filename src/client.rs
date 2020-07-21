@@ -44,7 +44,7 @@ impl Reddit {
     ///
     /// # Example
     /// ```
-    /// use reddit_api::client::Reddit;
+    /// use rsreddit::client::Reddit;
     /// let reddit = Reddit::default();
     /// ```
     /// Note: object is in usable state after `build()` is called.
@@ -62,8 +62,8 @@ impl Reddit {
     ///
     /// # Example
     /// ```
-    /// use reddit_api::client::Reddit;
-    /// use reddit_api::oauth2::RedditClientCredentials;
+    /// use rsreddit::client::Reddit;
+    /// use rsreddit::oauth2::RedditClientCredentials;
     /// let credentials = RedditClientCredentials::default().client_id("ABC");
     /// let reddit = Reddit::default()
     ///                      .client_credentials(&credentials);
@@ -76,7 +76,7 @@ impl Reddit {
     ///
     /// # Example
     /// ```
-    /// use reddit_api::client::Reddit;
+    /// use rsreddit::client::Reddit;
     /// let reddit = Reddit::default()
     ///                      .authorized_prefix("https://www.alternate_reddit.com/api/v1/");
     /// ```
@@ -88,7 +88,7 @@ impl Reddit {
     ///
     /// # Example
     /// ```
-    /// use reddit_api::client::Reddit;
+    /// use rsreddit::client::Reddit;
     /// let reddit = Reddit::default()
     ///                      .basic_prefix("https://www.alternate_reddit.com/");
     /// ```
