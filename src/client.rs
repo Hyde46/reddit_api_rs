@@ -139,6 +139,7 @@ impl Reddit {
                 let answer = post(&url, &payload_data, &data_header);
                 let comment_response: CommentResponse = serde_json::from_str(&answer).unwrap();
                 if let Some(err) = comment_response.json {
+                    //TODO: error out of potential many errors
                     let err_msg = format!("[{}] - {}", err.errors[0][0], err.errors[0][1]);
                     return Err(err_msg);
                 }
