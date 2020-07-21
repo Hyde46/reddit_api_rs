@@ -6,13 +6,8 @@ use rsreddit::oauth2::{AuthorizationTime, RedditApiScope, RedditOAuth};
 use rsreddit::util::convert_scope_vec_to_string;
 
 fn main() {
-    // Show hot posts for authorized user
-    // Works the same for:
-    // * reddit.hot()
-    // * reddit.controversial()
-    // * reddit.new()
-    // * reddit.rising()
-    // * reddit.best()
+    // Comment on thread, or reply to comment
+
 
     // OAuth2 Authorization stuff
     let mut reddit_oauth = RedditOAuth::default().build();
