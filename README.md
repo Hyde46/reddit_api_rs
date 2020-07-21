@@ -25,7 +25,7 @@ Add to your `Cargo.toml`:
 
 ``` toml
 [dependencies]
-rsreddit = "0.1.1"
+rsreddit = "0.1.2"
 ```
 
 Or get it from [GitHub](https://github.com/Hyde46/reddit_api_rs).

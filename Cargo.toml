@@ -1,6 +1,6 @@
 [package]
 name = "rsreddit"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Hyde46 <denis.heid@protonmail.com>"]
 keywords=["reddit","api"]
 edition = "2018"
