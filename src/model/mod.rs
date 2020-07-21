@@ -1,7 +1,6 @@
 //! All Reddit API endpoint response objects
-pub mod comment;
 pub mod listing;
-pub mod post;
+pub mod thing;
 pub mod preview;
 pub mod responses;
 pub mod sort_time;

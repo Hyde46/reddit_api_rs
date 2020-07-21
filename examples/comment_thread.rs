@@ -8,7 +8,6 @@ use rsreddit::util::convert_scope_vec_to_string;
 fn main() {
     // Comment on thread, or reply to comment
 
-
     // OAuth2 Authorization stuff
     let mut reddit_oauth = RedditOAuth::default().build();
     let mut scopes = Vec::new();

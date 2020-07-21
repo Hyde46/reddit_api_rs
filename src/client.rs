@@ -13,9 +13,9 @@ use serde_json::Value;
 // Own includes
 use super::curl_utils::*;
 use super::model::listing::Listing;
-use super::model::listing::Post;
 use super::model::responses::comment_response::CommentResponse;
 use super::model::sort_time::SortTime;
+use super::model::thing::Thing;
 use super::model::token::OAuthToken;
 use super::oauth2::OAuthState;
 use super::oauth2::RedditApiScope;
@@ -179,7 +179,7 @@ impl Reddit {
         limit: u32,
         show: bool,
         sr_detail: bool,
-    ) -> Result<Listing<Post>, String> {
+    ) -> Result<Listing, String> {
         let sorting = "best".to_string();
         self.get_post_by_sorting(
             sorting, subreddit, None, after, before, count, limit, show, sr_detail,
@@ -211,7 +211,7 @@ impl Reddit {
         limit: u32,
         show: bool,
         sr_detail: bool,
-    ) -> Result<Listing<Post>, String> {
+    ) -> Result<Listing, String> {
         let sorting = "hot".to_string();
         self.get_post_by_sorting(
             sorting, subreddit, None, after, before, count, limit, show, sr_detail,
@@ -243,7 +243,7 @@ impl Reddit {
         limit: u32,
         show: bool,
         sr_detail: bool,
-    ) -> Result<Listing<Post>, String> {
+    ) -> Result<Listing, String> {
         let sorting = "rising".to_string();
         self.get_post_by_sorting(
             sorting, subreddit, None, after, before, count, limit, show, sr_detail,
@@ -275,7 +275,7 @@ impl Reddit {
         limit: u32,
         show: bool,
         sr_detail: bool,
-    ) -> Result<Listing<Post>, String> {
+    ) -> Result<Listing, String> {
         let sorting = "new".to_string();
         self.get_post_by_sorting(
             sorting, subreddit, None, after, before, count, limit, show, sr_detail,
@@ -308,7 +308,7 @@ impl Reddit {
         limit: u32,
         show: bool,
         sr_detail: bool,
-    ) -> Result<Listing<Post>, String> {
+    ) -> Result<Listing, String> {
         let sorting = "top".to_string();
         self.get_post_by_sorting(
             sorting,
@@ -349,7 +349,7 @@ impl Reddit {
         limit: u32,
         show: bool,
         sr_detail: bool,
-    ) -> Result<Listing<Post>, String> {
+    ) -> Result<Listing, String> {
         let sorting = "controversial".to_string();
         self.get_post_by_sorting(
             sorting,
@@ -375,7 +375,7 @@ impl Reddit {
         limit: u32,
         show: bool,
         sr_detail: bool,
-    ) -> Result<Listing<Post>, String> {
+    ) -> Result<Listing, String> {
         // Validate parameters
         if limit > 100 || limit <= 0 {
             return Err("Limit bounds are [1, 100]".to_owned());
@@ -420,7 +420,7 @@ impl Reddit {
                     self.client_credentials.client_secret
                 );
                 let answer = get(&url, &data_header);
-                let listing: Listing<Post> = serde_json::from_str(&answer).unwrap();
+                let listing: Listing = serde_json::from_str(&answer).unwrap();
                 return Ok(listing);
             }
         } else {

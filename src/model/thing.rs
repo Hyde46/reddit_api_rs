@@ -1,5 +1,5 @@
+use super::super::model::listing::Listing;
 use super::super::model::preview::Preview;
-
 use std::fmt::Display;
 use std::str::FromStr;
 
@@ -8,13 +8,7 @@ use serde::de::{self, Deserializer};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct RedditPost {
-    pub kind: String,
-    pub data: RedditPostData,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct RedditPostData {
+pub struct Thing {
     pub id: String,
     pub subreddit: String,
     pub selftext: String,
@@ -72,6 +66,7 @@ pub struct RedditPostData {
     pub created_utc: f64,
     pub is_original_content: bool,
     pub num_crossposts: usize,
+    pub replies: Option<Listing>,
     pub thumbnail_width: Option<usize>,
     pub author_flair_template_id: Option<String>,
     pub user_reports: Vec<String>,

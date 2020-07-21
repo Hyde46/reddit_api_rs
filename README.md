@@ -14,6 +14,8 @@ Implemented endpoints:
     * Rising posts
     * New posts
     * Controversial posts
+* Comment on thread
+* Reply to comments
 
 OAuth2 specific implementations:
 * Authorize Client with Reddit UI ( Get OAuth bearer token )

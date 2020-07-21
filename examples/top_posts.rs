@@ -26,7 +26,16 @@ fn main() {
         // Get "after" tag from Listing to browse the following posts
         let after = answer.data.after.unwrap();
         // Query hot posts after previous ones
-        let next_answer = reddit.top(Some("/r/rust"), SortTime::day, &after, "", 0, 20, false, false);
+        let next_answer = reddit.top(
+            Some("/r/rust"),
+            SortTime::day,
+            &after,
+            "",
+            0,
+            20,
+            false,
+            false,
+        );
         // Do stuff with Listing
         match next_answer {
             Ok(a) => println!("{:?}", a),
