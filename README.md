@@ -1,4 +1,4 @@
-# RsReddit - A Rust client for the Reddit Web API
+# RsReddit - A Rust Wrapper for the Reddit Web API
 
 ## Description
 
