@@ -16,6 +16,7 @@ Implemented endpoints:
     * Controversial posts
 * Comment on thread
 * Reply to comments
+* Get Thread comment tree
 
 OAuth2 specific implementations:
 * Authorize Client with Reddit UI ( Installed APP type. See [here](https://github.com/reddit-archive/reddit/wiki/oauth2-app-types) )
