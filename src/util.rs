@@ -43,6 +43,12 @@ pub fn convert_scope_vec_to_string<S: Debug + ToString>(vec: &Vec<S>) -> String 
         .to_string()
 }
 
+/// Insert classname to JSON object represented as a String, since `serde` cannot deserialize such an object yet afaik
+pub fn insert_json_classname(class_name: &str, json_string: &str) -> String {
+    format!("{{ \"{}\" : {} }}", class_name, json_string)
+        .replace("\"replies\": \"\"", "\"replies\": null")
+}
+
 /// Generates a random string of `length` from Alphanumeric values
 pub fn generate_random_string(length: usize) -> String {
     rand::thread_rng()

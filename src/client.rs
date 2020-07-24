@@ -13,6 +13,7 @@ use serde_json::Value;
 // Own includes
 use super::curl_utils::*;
 use super::model::listing::Listing;
+use super::model::listing::ListingCollection;
 use super::model::responses::comment_response::CommentResponse;
 use super::model::sort_time::SortTime;
 use super::model::thing::Thing;
@@ -22,6 +23,7 @@ use super::oauth2::RedditApiScope;
 use super::oauth2::RedditClientCredentials;
 use super::oauth2::RedditOAuth;
 use super::util::convert_map_to_string;
+use super::util::insert_json_classname;
 use super::VERSION;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -109,6 +111,20 @@ impl Reddit {
         }
         self.is_built = true;
         self
+    }
+
+    //
+    // no authentication necessary
+    //
+
+    /// Query comments for a thread
+    /// # Arguments
+    /// * `permalink` permalink string of the thread
+    pub fn thread_by_permalink(&self, permalink: &str) -> Result<ListingCollection, String> {
+        let url = format!("{}{}.json", self.basic_prefix, permalink);
+        let answer = get(&url, "");
+        let augmented_answer = insert_json_classname("listings", &answer);
+        Ok(serde_json::from_str(&augmented_answer).unwrap())
     }
 
     //

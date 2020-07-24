@@ -1,4 +1,9 @@
-## 0.1.3 - WIP
+## 0.1.3 - (2020/24/07)
+
+- Rework Listings. No more generics over `Listing`, as a `Comment` and `Link` are almost the same
+- Add Comment Listings
+- Add Endpoint to query for Thread Tree by permalink
+- Add example [ `thread_by_permalink.rs`, `traverse_comment_tree.rs` ]
 
 ## 0.1.2 - (2020/21/07)
 

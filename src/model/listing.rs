@@ -11,7 +11,7 @@ pub struct Listing {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Data {
     pub modhash: String,
-    pub dist: u32,
+    pub dist: Option<u32>,
     pub before: Option<String>,
     pub after: Option<String>,
     pub children: Vec<Child>,
@@ -21,4 +21,9 @@ pub struct Data {
 pub struct Child {
     pub kind: String,
     pub data: Thing,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ListingCollection {
+    pub listings: Vec<Listing>,
 }
