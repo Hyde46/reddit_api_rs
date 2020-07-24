@@ -60,4 +60,4 @@ See [changelog](https://github.com/Hyde46/reddit_api_rs/blob/master/CHANGELOG.md
 
 ## Contribution
 
-Pull requetss, code reviews, general feedback are welcome!
+Pull requests, code reviews, general feedback are welcome!
