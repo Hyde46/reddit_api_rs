@@ -48,7 +48,7 @@ See the [official documentation](https://github.com/reddit-archive/reddit/wiki/o
     * [Top posts](https://github.com/Hyde46/reddit_api_rs/blob/master/examples/top_posts.rs)
     * [Best posts](https://github.com/Hyde46/reddit_api_rs/blob/master/examples/best_posts.rs)
     * [Comment on post or reply to comment](https://github.com/Hyde46/reddit_api_rs/blob/master/examples/comment_thread.rs)
-    * [Show comment tree](https://github.com/Hyde46/reddit_api_rs/blob/master/examples/traverse_comment_tree.rs)
+    * [Traverse comment tree](https://github.com/Hyde46/reddit_api_rs/blob/master/examples/traverse_comment_tree.rs)
 * Authorization Examples
     * [Authorize User](https://github.com/Hyde46/reddit_api_rs/blob/master/examples/authorize_user.rs)
     * [Refresh bearer token](https://github.com/Hyde46/reddit_api_rs/blob/master/examples/refresh_token.rs)
