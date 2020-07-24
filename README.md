@@ -1,4 +1,4 @@
-# RsReddit - A Rust Wrapper for the Reddit Web API
+# RsReddit - Lightweight Wrapper for the Reddit Web API written with rust
 
 ## Description
 
