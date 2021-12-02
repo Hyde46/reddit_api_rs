@@ -2,7 +2,7 @@
 
 ## Description
 
-RsReddit is lightweight wrapper for the Reddit Web API. The goal is to cover **most common and useful endpoints** like browsing subreddits, creating posts, commenting on posts. For a complete reference, see the [official documentation](https://www.reddit.com/dev/api/oauth)
+RsReddit is lightweight wrapper for the Reddit Web API. The goal is to cover some useful endpoints like browsing subreddits, creating posts, commenting on posts. For a complete reference, see the [official documentation](https://www.reddit.com/dev/api/oauth). As this is a toy project, not all endpoints are expected to be implemented
 
 ## Features
 
